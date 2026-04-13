@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>DNA Transcription & Translation Suite</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+    </head>
+    <body class="bg-slate-50 text-slate-900 min-h-screen">
+        <main class="max-w-6xl mx-auto px-4 py-10 space-y-8">
+            <header class="space-y-2">
+                <h1 class="text-3xl md:text-4xl font-bold tracking-tight">
+                    DNA Transcription & Translation Suite
+                </h1>
+                <p class="text-slate-600">
+                    Process DNA (template or coding strand) into mRNA, codons,
+                    amino-acid chains, and quick bio-statistics.
+                </p>
+            </header>
+
+            <section
+                class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 space-y-4 shadow-sm"
+            >
+                <h2 class="text-xl font-semibold">Sequence Input</h2>
+                <div class="grid md:grid-cols-3 gap-4 items-end">
+                    <div class="md:col-span-2 space-y-2">
+                        <label for="dnaInput" class="text-sm font-medium"
+                            >DNA sequence</label
+                        >
+                        <textarea
+                            id="dnaInput"
+                            rows="5"
+                            class="w-full rounded-lg border border-slate-300 p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            placeholder="Example: TACGGCATCTAA"
+                        ></textarea>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label for="strandType" class="text-sm font-medium"
+                                >DNA type</label
+                            >
+                            <select
+                                id="strandType"
+                                class="w-full rounded-lg border border-slate-300 p-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            >
+                                <option value="template">
+                                    Template Strand
+                                </option>
+                                <option value="coding">
+                                    Coding Strand (Non-Template)
+                                </option>
+                            </select>
+                        </div>
+                        <button
+                            id="processBtn"
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2.5 font-medium"
+                        >
+                            Process Sequence
+                        </button>
+                    </div>
+                </div>
+                <p id="inputError" class="text-sm text-red-600 hidden"></p>
+            </section>
+
+            <section
+                id="resultsSection"
+                class="hidden bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm space-y-6"
+            >
+                <h2 class="text-xl font-semibold">Results</h2>
+
+                <div class="grid lg:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <h3 class="font-medium">Aligned View</h3>
+                        <div
+                            class="rounded-lg bg-slate-50 border border-slate-200 p-3 text-sm space-y-3 font-mono"
+                        >
+                            <div>
+                                <p
+                                    class="text-xs uppercase tracking-wide text-slate-500 mb-1"
+                                >
+                                    DNA
+                                </p>
+                                <p id="dnaOut" class="break-words"></p>
+                            </div>
+                            <div>
+                                <p
+                                    class="text-xs uppercase tracking-wide text-slate-500 mb-1"
+                                >
+                                    mRNA
+                                </p>
+                                <p id="mrnaOut" class="break-words"></p>
+                            </div>
+                            <div>
+                                <p
+                                    class="text-xs uppercase tracking-wide text-slate-500 mb-1"
+                                >
+                                    Codons
+                                </p>
+                                <div
+                                    id="codonOut"
+                                    class="flex flex-wrap gap-1"
+                                ></div>
+                            </div>
+                            <div>
+                                <p
+                                    class="text-xs uppercase tracking-wide text-slate-500 mb-1"
+                                >
+                                    Protein chain
+                                </p>
+                                <p id="proteinOut" class="break-words"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h3 class="font-medium">Statistics</h3>
+                        <div
+                            class="rounded-lg bg-slate-50 border border-slate-200 p-3 text-sm"
+                        >
+                            <ul class="space-y-1">
+                                <li>
+                                    <span class="font-medium">GC content:</span>
+                                    <span id="gcOut"></span>
+                                </li>
+                                <li>
+                                    <span class="font-medium"
+                                        >Amino acid count:</span
+                                    >
+                                    <span id="aaCountOut"></span>
+                                </li>
+                                <li>
+                                    <span class="font-medium"
+                                        >Estimated molecular weight:</span
+                                    >
+                                    <span id="mwOut"></span>
+                                </li>
+                            </ul>
+                            <a
+                                id="blastLink"
+                                href="#"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-block mt-3 text-indigo-700 hover:text-indigo-900 underline"
+                            >
+                                Identify candidate proteins via NCBI BLAST
+                            </a>
+                            <p id="motifOut" class="mt-2 text-slate-700"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section
+                class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm space-y-4"
+            >
+                <h2 class="text-xl font-semibold">CSV Batch Processing</h2>
+                <div class="grid md:grid-cols-4 gap-4 items-end">
+                    <div class="md:col-span-2">
+                        <label for="csvInput" class="text-sm font-medium"
+                            >Upload CSV file</label
+                        >
+                        <input
+                            id="csvInput"
+                            type="file"
+                            accept=".csv"
+                            class="w-full mt-1 rounded-lg border border-slate-300 p-2 text-sm bg-white"
+                        />
+                    </div>
+                    <div>
+                        <label for="csvColumn" class="text-sm font-medium"
+                            >DNA column</label
+                        >
+                        <select
+                            id="csvColumn"
+                            class="w-full mt-1 rounded-lg border border-slate-300 p-2 text-sm"
+                        ></select>
+                    </div>
+                    <button
+                        id="processCsvBtn"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-4 py-2.5 font-medium"
+                    >
+                        Process CSV
+                    </button>
+                </div>
+                <p id="csvInfo" class="text-sm text-slate-600"></p>
+                <div class="overflow-auto border border-slate-200 rounded-lg">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-slate-100">
+                            <tr>
+                                <th class="text-left p-2">#</th>
+                                <th class="text-left p-2">DNA</th>
+                                <th class="text-left p-2">mRNA</th>
+                                <th class="text-left p-2">Protein</th>
+                                <th class="text-left p-2">GC %</th>
+                                <th class="text-left p-2">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="csvResultsBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <script type="module" src="./src/app.js"></script>
+    </body>
+</html>
