@@ -1,6 +1,6 @@
 # DNA Transcription & Translation Suite
 
-A lightweight browser-based bioinformatics tool that:
+A lightweight browser-based bioinformatics tool with a **Python (Flask) backend** that:
 
 - Transcribes DNA to mRNA from either **template** or **coding (non-template)** strands.
 - Translates mRNA codons into amino-acid chains using the standard genetic code.
@@ -9,6 +9,16 @@ A lightweight browser-based bioinformatics tool that:
 - Computes quick metrics like **GC-content** and estimated **protein molecular weight**.
 - Supports **CSV batch processing** with selectable DNA column.
 - Adds a direct outbound link to NCBI BLAST for downstream protein identification.
+
+## Architecture
+
+The core transcription/translation logic is implemented in **Python**:
+
+- `src/genetic_code.py` – codon tables, mappings, and constants.
+- `src/engine.py` – DNA validation, transcription, translation, and statistics.
+- `src/server.py` – Flask API server that exposes `/api/process` and `/api/process-batch` endpoints, and serves the static frontend.
+
+The frontend (`index.html` + `src/app.js`) is a lightweight HTML/CSS/JS interface that calls the Python API via `fetch`.
 
 ## Biological Rules Implemented
 
@@ -29,18 +39,30 @@ A lightweight browser-based bioinformatics tool that:
 
 ## Run Locally
 
-This project is plain HTML + JavaScript and has no build step.
+### Prerequisites
 
-1. Open `index.html` in a browser, or
-2. Serve with a local server (recommended for module loading).
+- Python 3.10+
+- pip
 
-Example using Python:
+### Setup
 
 ```bash
-python3 -m http.server 8080
+pip install -r requirements.txt
+```
+
+### Start the Server
+
+```bash
+python3 src/server.py
 ```
 
 Then visit `http://localhost:8080`.
+
+### Run Tests
+
+```bash
+python3 -m pytest tests/ -v
+```
 
 ## Suggested Next Enhancements
 

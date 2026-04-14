@@ -1,0 +1,71 @@
+CODON_TO_AMINO = {
+    "UUU": "Phe", "UUC": "Phe", "UUA": "Leu", "UUG": "Leu",
+    "UCU": "Ser", "UCC": "Ser", "UCA": "Ser", "UCG": "Ser",
+    "UAU": "Tyr", "UAC": "Tyr", "UAA": "Stop", "UAG": "Stop",
+    "UGU": "Cys", "UGC": "Cys", "UGA": "Stop", "UGG": "Trp",
+
+    "CUU": "Leu", "CUC": "Leu", "CUA": "Leu", "CUG": "Leu",
+    "CCU": "Pro", "CCC": "Pro", "CCA": "Pro", "CCG": "Pro",
+    "CAU": "His", "CAC": "His", "CAA": "Gln", "CAG": "Gln",
+    "CGU": "Arg", "CGC": "Arg", "CGA": "Arg", "CGG": "Arg",
+
+    "AUU": "Ile", "AUC": "Ile", "AUA": "Ile", "AUG": "Met",
+    "ACU": "Thr", "ACC": "Thr", "ACA": "Thr", "ACG": "Thr",
+    "AAU": "Asn", "AAC": "Asn", "AAA": "Lys", "AAG": "Lys",
+    "AGU": "Ser", "AGC": "Ser", "AGA": "Arg", "AGG": "Arg",
+
+    "GUU": "Val", "GUC": "Val", "GUA": "Val", "GUG": "Val",
+    "GCU": "Ala", "GCC": "Ala", "GCA": "Ala", "GCG": "Ala",
+    "GAU": "Asp", "GAC": "Asp", "GAA": "Glu", "GAG": "Glu",
+    "GGU": "Gly", "GGC": "Gly", "GGA": "Gly", "GGG": "Gly",
+}
+
+STOP_CODONS = {"UAA", "UAG", "UGA"}
+
+DNA_TEMPLATE_TO_MRNA = {
+    "A": "U",
+    "T": "A",
+    "C": "G",
+    "G": "C",
+}
+
+DNA_CODING_TO_MRNA = {
+    "A": "A",
+    "T": "U",
+    "C": "C",
+    "G": "G",
+}
+
+AMINO_TO_ONE_LETTER = {
+    "Ala": "A", "Arg": "R", "Asn": "N", "Asp": "D",
+    "Cys": "C", "Gln": "Q", "Glu": "E", "Gly": "G",
+    "His": "H", "Ile": "I", "Leu": "L", "Lys": "K",
+    "Met": "M", "Phe": "F", "Pro": "P", "Ser": "S",
+    "Thr": "T", "Trp": "W", "Tyr": "Y", "Val": "V",
+}
+
+RESIDUE_MASS_DA = {
+    "Ala": 89.09, "Arg": 174.2, "Asn": 132.12, "Asp": 133.1,
+    "Cys": 121.16, "Gln": 146.15, "Glu": 147.13, "Gly": 75.07,
+    "His": 155.16, "Ile": 131.18, "Leu": 131.18, "Lys": 146.19,
+    "Met": 149.21, "Phe": 165.19, "Pro": 115.13, "Ser": 105.09,
+    "Thr": 119.12, "Trp": 204.23, "Tyr": 181.19, "Val": 117.15,
+}
+
+PROTEIN_MOTIFS = [
+    {
+        "name": "N-glycosylation consensus motif",
+        "regex": r"N[^P][ST][^P]",
+        "description": "Potential N-linked glycosylation site.",
+    },
+    {
+        "name": "ER retention signal",
+        "regex": r"KDEL$",
+        "description": "Possible ER retention signal at C-terminus.",
+    },
+    {
+        "name": "Nuclear localization-like motif",
+        "regex": r"K[KR].{0,2}[KR]",
+        "description": "Basic-rich region that may indicate nuclear localization.",
+    },
+]

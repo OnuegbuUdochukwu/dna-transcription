@@ -1,5 +1,3 @@
-import { processSequence } from "./engine.js";
-
 const dnaInput = document.getElementById("dnaInput");
 const strandType = document.getElementById("strandType");
 const processBtn = document.getElementById("processBtn");
@@ -23,6 +21,24 @@ const csvInfo = document.getElementById("csvInfo");
 const csvResultsBody = document.getElementById("csvResultsBody");
 
 let csvRows = [];
+
+async function callProcessAPI(dna, strandTypeValue) {
+    const response = await fetch("/api/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dna, strandType: strandTypeValue }),
+    });
+    return response.json();
+}
+
+async function callBatchAPI(sequences, strandTypeValue) {
+    const response = await fetch("/api/process-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sequences, strandType: strandTypeValue }),
+    });
+    return response.json();
+}
 
 function setError(message) {
     if (!message) {
@@ -79,11 +95,8 @@ function renderSingleResult(result) {
     }
 }
 
-processBtn.addEventListener("click", () => {
-    const result = processSequence({
-        dna: dnaInput.value,
-        strandType: strandType.value,
-    });
+processBtn.addEventListener("click", async () => {
+    const result = await callProcessAPI(dnaInput.value, strandType.value);
     if (result.error) {
         setError(result.error);
         return;
@@ -121,7 +134,7 @@ csvInput.addEventListener("change", () => {
     });
 });
 
-processCsvBtn.addEventListener("click", () => {
+processCsvBtn.addEventListener("click", async () => {
     if (!csvRows.length) {
         csvInfo.textContent = "Please upload a CSV file first.";
         return;
@@ -134,20 +147,17 @@ processCsvBtn.addEventListener("click", () => {
     }
 
     const t0 = performance.now();
+    const sequences = csvRows.map((row) => row[column] || "");
+    const results = await callBatchAPI(sequences, strandType.value);
 
-    const rows = csvRows.map((row, i) => {
-        const dna = row[column] || "";
-        const result = processSequence({ dna, strandType: strandType.value });
-
-        return {
-            index: i + 1,
-            dna: String(dna).trim(),
-            mrna: result.error ? "" : result.mrna,
-            protein: result.error ? "" : result.proteinChain,
-            gc: result.error ? "" : `${result.gcContent.toFixed(2)}%`,
-            status: result.error || "OK",
-        };
-    });
+    const rows = results.map((result, i) => ({
+        index: i + 1,
+        dna: String(sequences[i]).trim(),
+        mrna: result.error ? "" : result.mrna,
+        protein: result.error ? "" : result.proteinChain,
+        gc: result.error ? "" : `${result.gcContent.toFixed(2)}%`,
+        status: result.error || "OK",
+    }));
 
     csvResultsBody.innerHTML = "";
     rows.forEach((row) => {
