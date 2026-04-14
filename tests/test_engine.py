@@ -47,7 +47,7 @@ class TestProcessSequence(unittest.TestCase):
         self.assertIsNone(result["error"])
         self.assertAlmostEqual(result["gcContent"], 50.0)
 
-    def test_molecular_weight_zero_for_empty_protein(self):
+    def test_molecular_weight_nonzero_for_single_codon(self):
         result = process_sequence("AAA", strand_type="coding")
         self.assertIsNone(result["error"])
         self.assertGreater(result["molecularWeight"], 0)
