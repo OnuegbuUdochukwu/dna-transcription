@@ -2,9 +2,8 @@
     "name": "dna-transcription-suite",
     "version": "1.0.0",
     "private": true,
-    "type": "module",
     "scripts": {
-        "test": "node --test",
-        "start": "python3 -m http.server 8080"
+        "test": "python3 -m pytest tests/ -v",
+        "start": "python3 src/server.py"
     }
 }
