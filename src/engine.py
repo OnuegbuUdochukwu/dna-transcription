@@ -12,6 +12,8 @@ from src.genetic_code import (
 
 _DNA_VALID_PATTERN = re.compile(r"^[ATCG\s]+$", re.IGNORECASE)
 
+_DNA_COMPLEMENT = {"A": "T", "T": "A", "G": "C", "C": "G", "N": "N"}
+
 
 def normalize_dna(raw_input):
     return re.sub(r"\s+", "", (raw_input or "")).upper()
@@ -24,6 +26,93 @@ def validate_dna(raw_input):
     if not _DNA_VALID_PATTERN.match(trimmed):
         return {"valid": False, "error": "DNA must only contain A, T, C, and G."}
     return {"valid": True, "error": None}
+
+
+def clean_sequence(raw):
+    """
+    Clean a raw sequence string:
+    - Skip FASTA header lines (starting with '>')
+    - Remove whitespace, digits, and all non-letter characters
+    - Convert to UPPERCASE
+    """
+    lines = (raw or "").strip().splitlines()
+    cleaned = []
+    for line in lines:
+        line = line.strip()
+        if line.startswith(">"):
+            continue
+        line = re.sub(r"[^A-Za-z]", "", line)
+        cleaned.append(line.upper())
+    return "".join(cleaned)
+
+
+def validate_sequence(seq):
+    """
+    Validate sequence length, empty status, and ensure it doesn't
+    contain both T and U or invalid characters.
+
+    Returns: {"valid": True/False, "error": None/message}
+    """
+    if not seq:
+        return {"valid": False, "error": "Sequence is empty after cleaning."}
+    if len(seq) < 3:
+        return {"valid": False, "error": "Sequence too short (minimum 3 bases)."}
+
+    has_t = "T" in seq
+    has_u = "U" in seq
+    if has_t and has_u:
+        return {"valid": False, "error": "Contains both T and U — not valid DNA or RNA."}
+
+    valid = set("ATGCN") if (has_t or not has_u) else set("AUGCN")
+    invalid = set(seq) - valid
+    if invalid:
+        return {
+            "valid": False,
+            "error": f'Invalid characters: {", ".join(sorted(invalid))}',
+        }
+    return {"valid": True, "error": None}
+
+
+def detect_sequence_type(seq):
+    """
+    Rule: T present (no U) -> DNA; U present (no T) -> RNA.
+    Returns: 'DNA' or 'RNA'
+    """
+    has_t = "T" in seq
+    has_u = "U" in seq
+    if has_t and has_u:
+        raise ValueError("Ambiguous: sequence contains both T and U.")
+    elif has_u:
+        return "RNA"
+    else:
+        return "DNA"
+
+
+def reverse_transcribe(mrna):
+    """
+    Reverse transcription: convert mRNA back to the DNA coding strand.
+    Rule: replace every U with T.
+    """
+    return mrna.replace("U", "T")
+
+
+def get_reverse_complement(seq):
+    """
+    Generate the reverse complement of a DNA sequence.
+    Step 1: Complement each base. Step 2: Reverse the sequence.
+    """
+    complement = "".join(_DNA_COMPLEMENT.get(b, b) for b in seq)
+    return complement[::-1]
+
+
+def calculate_base_percentages(seq):
+    """
+    Returns a dictionary mapping each base letter to its percentage (rounded to 2 dp).
+    """
+    if not seq:
+        raise ValueError("Cannot calculate base percentages of empty sequence.")
+    total = len(seq)
+    return {base: round(seq.count(base) / total * 100, 2) for base in sorted(set(seq))}
 
 
 def transcribe_dna(dna, strand_type="template"):
@@ -115,4 +204,7 @@ def process_sequence(dna, strand_type="template"):
         "gcContent": gc_content_percent(normalized_dna),
         "molecularWeight": estimate_molecular_weight(translation["aminoAcids"]),
         "motifs": motifs,
+        "reverseTranscription": reverse_transcribe(mrna),
+        "reverseComplement": get_reverse_complement(normalized_dna),
+        "basePercentages": calculate_base_percentages(normalized_dna),
     }

@@ -8,9 +8,12 @@ const dnaOut = document.getElementById("dnaOut");
 const mrnaOut = document.getElementById("mrnaOut");
 const codonOut = document.getElementById("codonOut");
 const proteinOut = document.getElementById("proteinOut");
+const revTranscriptOut = document.getElementById("revTranscriptOut");
+const revComplementOut = document.getElementById("revComplementOut");
 const gcOut = document.getElementById("gcOut");
 const aaCountOut = document.getElementById("aaCountOut");
 const mwOut = document.getElementById("mwOut");
+const basePctOut = document.getElementById("basePctOut");
 const blastLink = document.getElementById("blastLink");
 const motifOut = document.getElementById("motifOut");
 
@@ -78,9 +81,27 @@ function renderSingleResult(result) {
 
     proteinOut.textContent =
         result.proteinChain || "No translated amino acids detected.";
+    revTranscriptOut.textContent = result.reverseTranscription || "";
+    revComplementOut.textContent = result.reverseComplement || "";
     gcOut.textContent = `${result.gcContent.toFixed(2)}%`;
     aaCountOut.textContent = `${result.aminoAcids.length}`;
     mwOut.textContent = `${result.molecularWeight.toFixed(2)} Da`;
+
+    basePctOut.innerHTML = "";
+    if (result.basePercentages && Object.keys(result.basePercentages).length) {
+        const label = document.createElement("p");
+        label.className = "font-medium mt-1";
+        label.textContent = "Base percentages:";
+        basePctOut.appendChild(label);
+        Object.entries(result.basePercentages)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .forEach(([base, pct]) => {
+                const p = document.createElement("p");
+                p.className = "ml-2 text-slate-600";
+                p.textContent = `${base}: ${pct.toFixed(2)}%`;
+                basePctOut.appendChild(p);
+            });
+    }
 
     blastLink.href = result.oneLetterProtein
         ? `https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins&PROGRAM=blastp&QUERY=${encodeURIComponent(result.oneLetterProtein)}`
