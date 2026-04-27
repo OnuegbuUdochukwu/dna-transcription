@@ -185,6 +185,7 @@ def find_protein_motifs(one_letter_protein):
 
 
 def process_sequence(dna, strand_type="template"):
+    dna = clean_sequence(dna)
     validation = validate_dna(dna)
     if not validation["valid"]:
         return {"error": validation["error"]}
