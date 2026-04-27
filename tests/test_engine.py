@@ -83,6 +83,31 @@ class TestProcessSequence(unittest.TestCase):
         self.assertAlmostEqual(result["basePercentages"]["G"], 50.0)
 
 
+class TestProcessSequenceFasta(unittest.TestCase):
+    def test_fasta_with_grch38_header(self):
+        fasta = ">4 dna:chromosome chromosome:GRCh38:4:122868001:122946006:1\nATGCTT"
+        result = process_sequence(fasta, strand_type="coding")
+        self.assertIsNone(result["error"])
+        self.assertEqual(result["dna"], "ATGCTT")
+        self.assertEqual(result["mrna"], "AUGCUU")
+
+    def test_fasta_multiline_sequence(self):
+        fasta = ">seq1\nATGC\nATGC"
+        result = process_sequence(fasta, strand_type="coding")
+        self.assertIsNone(result["error"])
+        self.assertEqual(result["dna"], "ATGCATGC")
+
+    def test_plain_nucleotides_still_work(self):
+        result = process_sequence("ATGCTT", strand_type="coding")
+        self.assertIsNone(result["error"])
+        self.assertEqual(result["dna"], "ATGCTT")
+
+    def test_fasta_header_only_without_sequence_returns_error(self):
+        fasta = ">4 dna:chromosome chromosome:GRCh38:4:122868001:122946006:1\n"
+        result = process_sequence(fasta, strand_type="coding")
+        self.assertIsNotNone(result["error"])
+
+
 class TestCleanSequence(unittest.TestCase):
     def test_strips_whitespace_and_uppercases(self):
         self.assertEqual(clean_sequence("  atgc  "), "ATGC")
